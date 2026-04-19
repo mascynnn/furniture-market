@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'CasaForma — Mabel Furniture Pilihan')</title>
+    <title>@yield('title', 'CasaForma') — Furniture Marketplace</title>
 
     {{-- Google Fonts: Cormorant Garamond (display) + DM Sans (body) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,8 @@
             --white:     #faf9f6;
             --text:      #e8e2d8;
             --text-muted:#8a8278;
-            --red:       #c0392b;
+            --danger:    #c0392b;
+            --success:   #27ae60;
 
             --font-display: 'Cormorant Garamond', Georgia, serif;
             --font-body:    'DM Sans', sans-serif;
@@ -72,215 +73,96 @@
             border-bottom: 1px solid var(--border);
             transition: var(--transition);
         }
-        .navbar__logo {
+        .navbar-brand {
             font-family: var(--font-display);
             font-size: 22px;
             font-weight: 500;
             letter-spacing: 0.08em;
             color: var(--cream);
+            text-decoration: none;
         }
-        .navbar__logo span { color: var(--gold); }
-        .navbar__nav {
+        .navbar-brand span { color: var(--gold); }
+
+        .navbar-links {
             display: flex; align-items: center; gap: 36px;
             list-style: none;
         }
-        .navbar__nav a {
+        .navbar-links a {
             font-size: 12px;
             font-weight: 400;
             letter-spacing: 0.12em;
             text-transform: uppercase;
             color: var(--text-muted);
+            text-decoration: none;
             transition: color var(--transition);
         }
-        .navbar__nav a:hover,
-        .navbar__nav a.active { color: var(--gold); }
-        .navbar__actions {
+        .navbar-links a:hover,
+        .navbar-links a.active { color: var(--gold); }
+
+        .navbar-actions {
             display: flex; align-items: center; gap: 20px;
         }
-        .navbar__icon {
-            position: relative;
-            width: 38px; height: 38px;
-            display: flex; align-items: center; justify-content: center;
+        .navbar-actions a {
             color: var(--cream-dim);
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: flex; align-items: center; gap: 0.35rem;
+            width: 38px; height: 38px;
+            justify-content: center;
             transition: color var(--transition);
-            cursor: pointer;
+            position: relative;
         }
-        .navbar__icon:hover { color: var(--gold); }
-        .navbar__icon svg { width: 20px; height: 20px; }
-        .badge {
+        .navbar-actions a:hover { color: var(--gold); }
+        .navbar-actions a svg { width: 20px; height: 20px; }
+
+        /* Text links in navbar-actions (Pesanan, Laporan) */
+        .navbar-actions a.text-link {
+            width: auto; height: auto;
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .cart-badge {
             position: absolute; top: 4px; right: 4px;
             width: 16px; height: 16px;
             background: var(--gold);
             color: var(--bg);
+            border-radius: 50%;
             font-size: 9px;
             font-weight: 600;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .btn-nav {
-            padding: 8px 20px;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            font-size: 11px;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            background: transparent;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .btn-nav:hover {
-            background: var(--gold);
-            color: var(--bg);
+            display: inline-flex; align-items: center; justify-content: center;
         }
 
-        /* ── Dropdown User ──────────────────────── */
-        .user-dropdown { position: relative; }
-        .user-dropdown__menu {
-            display: none;
-            position: absolute; top: calc(100% + 12px); right: 0;
-            min-width: 180px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 8px 0;
-        }
-        .user-dropdown:hover .user-dropdown__menu { display: block; }
-        .user-dropdown__menu a,
-        .user-dropdown__menu button {
-            display: block; width: 100%;
-            padding: 10px 18px;
-            font-size: 12px;
-            letter-spacing: 0.06em;
-            color: var(--text-muted);
-            text-align: left;
-            background: none; border: none; cursor: pointer;
-            transition: var(--transition);
-        }
-        .user-dropdown__menu a:hover,
-        .user-dropdown__menu button:hover {
-            color: var(--gold);
-            background: rgba(200,169,110,0.06);
-        }
-        .user-dropdown__menu hr {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 6px 0;
+        /* ══════════════════════════════════════════
+           PAGE WRAPPER
+        ══════════════════════════════════════════ */
+        .page-wrapper {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2.5rem 48px;
+            padding-top: calc(68px + 2.5rem);
         }
 
         /* ══════════════════════════════════════════
            FLASH MESSAGES
         ══════════════════════════════════════════ */
-        .flash {
-            position: fixed; top: 80px; right: 24px; z-index: 200;
-            max-width: 340px;
+        .alert {
             padding: 14px 20px;
             font-size: 13px;
             letter-spacing: 0.04em;
             border-left: 3px solid;
-            animation: slideIn 0.4s ease, fadeOut 0.4s ease 3.6s forwards;
-        }
-        .flash--success {
+            margin-bottom: 1.5rem;
             background: rgba(20,18,16,0.95);
-            border-color: var(--gold);
             color: var(--cream);
         }
-        .flash--error {
-            background: rgba(20,18,16,0.95);
-            border-color: var(--red);
-            color: var(--cream);
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes fadeOut {
-            to { opacity: 0; transform: translateX(20px); }
-        }
+        .alert-success { border-color: var(--gold); }
+        .alert-error   { border-color: var(--danger); }
+        .alert-info    { border-color: var(--gold-dim); }
 
         /* ══════════════════════════════════════════
-           MAIN CONTENT
+           BUTTONS
         ══════════════════════════════════════════ */
-        .main { padding-top: 68px; min-height: calc(100vh - 68px); }
-
-        /* ══════════════════════════════════════════
-           FOOTER
-        ══════════════════════════════════════════ */
-        .footer {
-            border-top: 1px solid var(--border);
-            padding: 56px 48px 32px;
-            margin-top: 96px;
-        }
-        .footer__grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 48px;
-            margin-bottom: 48px;
-        }
-        .footer__brand-name {
-            font-family: var(--font-display);
-            font-size: 28px;
-            color: var(--cream);
-            margin-bottom: 16px;
-        }
-        .footer__brand-name span { color: var(--gold); }
-        .footer__tagline {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.8;
-            max-width: 260px;
-        }
-        .footer__heading {
-            font-size: 10px;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: var(--gold);
-            margin-bottom: 20px;
-        }
-        .footer__links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer__links a {
-            font-size: 13px;
-            color: var(--text-muted);
-            transition: color var(--transition);
-        }
-        .footer__links a:hover { color: var(--cream); }
-        .footer__bottom {
-            border-top: 1px solid var(--border);
-            padding-top: 24px;
-            display: flex; justify-content: space-between;
-            font-size: 11px;
-            color: var(--text-muted);
-            letter-spacing: 0.06em;
-        }
-
-        /* ══════════════════════════════════════════
-           UTILITIES
-        ══════════════════════════════════════════ */
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 48px;
-        }
-        .section-label {
-            font-size: 10px;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            color: var(--gold);
-            margin-bottom: 12px;
-        }
-        .section-title {
-            font-family: var(--font-display);
-            font-size: clamp(32px, 4vw, 52px);
-            font-weight: 400;
-            line-height: 1.15;
-            color: var(--cream);
-        }
-        .section-title em { font-style: italic; color: var(--gold); }
-        .divider {
-            width: 48px; height: 1px;
-            background: var(--gold);
-            margin: 24px 0;
-        }
-
-        /* ── Buttons ────────────────────────────── */
         .btn {
             display: inline-flex; align-items: center; gap: 8px;
             padding: 13px 28px;
@@ -291,14 +173,21 @@
             cursor: pointer;
             transition: var(--transition);
             border: none;
+            text-decoration: none;
+            font-family: var(--font-body);
         }
         .btn-primary {
             background: var(--gold);
             color: var(--bg);
         }
-        .btn-primary:hover {
-            background: var(--cream);
+        .btn-primary:hover { background: var(--cream); }
+
+        .btn-accent {
+            background: var(--gold);
+            color: var(--bg);
         }
+        .btn-accent:hover { background: var(--gold-dim); }
+
         .btn-outline {
             background: transparent;
             border: 1px solid var(--gold);
@@ -322,310 +211,226 @@
             border: 1px solid rgba(192,57,43,0.4);
             color: #e57d6d;
         }
-        .btn-danger:hover {
-            background: rgba(192,57,43,0.15);
-        }
+        .btn-danger:hover { background: rgba(192,57,43,0.15); }
 
-        /* ── Form ───────────────────────────────── */
-        .form-group { margin-bottom: 24px; }
-        .form-label {
-            display: block;
+        .btn-sm { padding: 8px 16px; font-size: 10px; }
+        .btn-lg { padding: 16px 36px; font-size: 13px; }
+
+        /* ══════════════════════════════════════════
+           SECTION HEADING
+        ══════════════════════════════════════════ */
+        .section-heading {
+            font-family: var(--font-display);
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 400;
+            color: var(--cream);
+            margin-bottom: 0.25rem;
+            line-height: 1.15;
+        }
+        .section-heading em { font-style: italic; color: var(--gold); }
+        .section-subheading {
+            color: var(--text-muted);
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            margin-bottom: 2rem;
+        }
+        .section-label {
             font-size: 10px;
-            font-weight: 500;
-            letter-spacing: 0.16em;
+            letter-spacing: 0.22em;
             text-transform: uppercase;
             color: var(--gold);
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            color: var(--cream);
-            font-size: 14px;
-            font-family: var(--font-body);
-            transition: border-color var(--transition);
-            outline: none;
-            border-radius: var(--radius-sm);
-        }
-        .form-control:focus {
-            border-color: var(--gold);
-            background: rgba(200,169,110,0.04);
-        }
-        .form-control::placeholder { color: var(--text-muted); }
-        .form-error {
-            margin-top: 6px;
-            font-size: 12px;
-            color: #e57d6d;
-        }
-        select.form-control option { background: var(--bg-card); }
-
-        /* ── Star rating input ──────────────────── */
-        .star-rating {
-            display: flex; flex-direction: row-reverse;
-            gap: 4px;
-        }
-        .star-rating input { display: none; }
-        .star-rating label {
-            font-size: 28px;
-            color: var(--border);
-            cursor: pointer;
-            transition: color 0.15s;
-        }
-        .star-rating input:checked ~ label,
-        .star-rating label:hover,
-        .star-rating label:hover ~ label {
-            color: var(--gold);
+        .divider {
+            width: 48px; height: 1px;
+            background: var(--gold);
+            margin: 24px 0;
         }
 
-        /* ── Card produk ────────────────────────── */
-        .product-card {
+        /* ══════════════════════════════════════════
+           CARD
+        ══════════════════════════════════════════ */
+        .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
             overflow: hidden;
             transition: var(--transition);
-            position: relative;
         }
-        .product-card:hover { border-color: rgba(200,169,110,0.3); }
-        .product-card__img {
-            width: 100%; aspect-ratio: 4/3;
-            object-fit: cover;
-            transition: transform 0.5s ease;
+        .card:hover { border-color: rgba(200,169,110,0.3); }
+        .card-body { padding: 1.5rem; }
+
+        /* ══════════════════════════════════════════
+           TABLE
+        ══════════════════════════════════════════ */
+        table.cf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .cf-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 500;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
         }
-        .product-card:hover .product-card__img { transform: scale(1.04); }
-        .product-card__img-wrap { overflow: hidden; position: relative; }
-        .product-card__badge {
-            position: absolute; top: 12px; left: 12px;
+        .cf-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            color: var(--text);
+        }
+        .cf-table tr:last-child td { border-bottom: none; }
+        .cf-table tr:hover td { background: var(--bg-hover); }
+
+        /* ══════════════════════════════════════════
+           BADGE / STATUS
+        ══════════════════════════════════════════ */
+        .badge {
+            display: inline-block;
             padding: 4px 10px;
-            font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
-            background: var(--gold); color: var(--bg);
+            font-size: 9px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 500;
         }
-        .product-card__body { padding: 18px 20px 20px; }
-        .product-card__category {
-            font-size: 10px; letter-spacing: 0.16em;
-            text-transform: uppercase; color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-        .product-card__name {
-            font-family: var(--font-display);
-            font-size: 18px; font-weight: 500;
-            color: var(--cream);
-            margin-bottom: 8px;
-            line-height: 1.3;
-        }
-        .product-card__price {
-            font-size: 15px; font-weight: 500;
-            color: var(--gold);
-        }
-        .product-card__footer {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 20px;
+        .badge-pending   { background: rgba(200,169,110,0.15); color: var(--gold); }
+        .badge-paid      { background: rgba(39,174,96,0.15);   color: #5ddc8e; }
+        .badge-shipped   { background: rgba(52,152,219,0.15);  color: #74b9e8; }
+        .badge-delivered { background: rgba(39,174,96,0.15);   color: #5ddc8e; }
+        .badge-cancelled { background: rgba(192,57,43,0.15);   color: #e57d6d; }
+
+        /* ══════════════════════════════════════════
+           FOOTER
+        ══════════════════════════════════════════ */
+        footer {
             border-top: 1px solid var(--border);
+            padding: 56px 48px 32px;
+            margin-top: 96px;
         }
-        .stars { display: flex; gap: 2px; }
-        .star { font-size: 12px; color: var(--gold); }
-        .star.empty { color: var(--border); }
-        .wishlist-btn {
-            width: 32px; height: 32px;
-            background: none; border: none; cursor: pointer;
-            color: var(--text-muted);
-            transition: var(--transition);
-            display: flex; align-items: center; justify-content: center;
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 48px;
+            margin-bottom: 48px;
         }
-        .wishlist-btn:hover, .wishlist-btn.active { color: #e57d6d; }
-        .wishlist-btn svg { width: 18px; height: 18px; }
-
-        /* ── Pagination ─────────────────────────── */
-        .pagination {
-            display: flex; justify-content: center; align-items: center;
-            gap: 4px; padding: 48px 0;
-        }
-        .page-item a, .page-item span {
-            display: flex; align-items: center; justify-content: center;
-            width: 38px; height: 38px;
-            font-size: 13px;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            transition: var(--transition);
-        }
-        .page-item a:hover { border-color: var(--gold); color: var(--gold); }
-        .page-item.active span { background: var(--gold); border-color: var(--gold); color: var(--bg); }
-
-        /* ── Notif bell dropdown ────────────────── */
-        .notif-dropdown { position: relative; }
-        .notif-panel {
-            display: none;
-            position: absolute; top: calc(100% + 12px); right: 0;
-            width: 320px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            max-height: 420px; overflow-y: auto;
-        }
-        .notif-dropdown:hover .notif-panel { display: block; }
-        .notif-panel__header {
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .notif-panel__header h4 {
-            font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+        .footer-brand {
+            font-family: var(--font-display);
+            font-size: 28px;
             color: var(--cream);
+            margin-bottom: 16px;
         }
-        .notif-panel__header a {
-            font-size: 11px; color: var(--gold);
+        .footer-brand span { color: var(--gold); }
+        .footer-tagline {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.8;
+            max-width: 260px;
         }
-        .notif-item {
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--border);
-            transition: background var(--transition);
+        .footer-heading {
+            font-size: 10px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 20px;
         }
-        .notif-item:hover { background: var(--bg-hover); }
-        .notif-item.unread { border-left: 2px solid var(--gold); }
-        .notif-item__title {
-            font-size: 13px; color: var(--cream);
-            margin-bottom: 4px;
+        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+        .footer-links a {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: block;
+            transition: color var(--transition);
         }
-        .notif-item__time {
-            font-size: 11px; color: var(--text-muted);
-        }
-        .notif-empty {
-            padding: 32px 18px;
-            text-align: center;
-            font-size: 13px; color: var(--text-muted);
+        .footer-links a:hover { color: var(--cream); }
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+            display: flex; justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.06em;
         }
     </style>
-
     @stack('styles')
 </head>
 <body>
 
-{{-- ═══════════════════════════════ NAVBAR ═══════════════════════════════ --}}
 <nav class="navbar">
-    <a href="{{ route('home') }}" class="navbar__logo">Casa<span>Forma</span></a>
-
-    <ul class="navbar__nav">
-        <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Beranda</a></li>
-        <li><a href="{{ route('products.index') }}" class="{{ request()->routeIs('products.*') ? 'active' : '' }}">Katalog</a></li>
-        <li><a href="{{ route('products.index', ['category' => 'sofa']) }}">Sofa</a></li>
-        <li><a href="{{ route('products.index', ['category' => 'meja']) }}">Meja</a></li>
-        <li><a href="{{ route('products.index', ['category' => 'kursi']) }}">Kursi</a></li>
+    <a class="navbar-brand" href="/">Casa<span>Forma</span></a>
+    <ul class="navbar-links">
+        <li><a href="{{ route('products.index') }}">Koleksi</a></li>
+        <li><a href="{{ route('search.index') }}" class="{{ request()->routeIs('search.*') ? 'active' : '' }}">Cari Furniture</a></li>
+        <li><a href="#">Ruang Inspirasi</a></li>
+        <li><a href="#">Tentang Kami</a></li>
     </ul>
-
-    <div class="navbar__actions">
+    <div class="navbar-actions">
+        <a href="{{ route('search.index') }}">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </a>
+        <a href="{{ route('cart.index') }}">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            @if(session('cart') && count(session('cart')) > 0)
+                <span class="cart-badge">{{ count(session('cart')) }}</span>
+            @endif
+        </a>
         @auth
-            {{-- Notifikasi --}}
-            <div class="navbar__icon notif-dropdown">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-                @php $unreadCount = auth()->user()->unreadNotifications->count(); @endphp
-                @if($unreadCount > 0)
-                    <span class="badge">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
-                @endif
-
-                <div class="notif-panel">
-                    <div class="notif-panel__header">
-                        <h4>Notifikasi</h4>
-                        @if($unreadCount > 0)
-                            <a href="{{ route('notifications.readAll') }}" onclick="event.preventDefault(); document.getElementById('read-all-form').submit()">Tandai Semua Dibaca</a>
-                            <form id="read-all-form" action="{{ route('notifications.readAll') }}" method="POST" style="display:none">@csrf</form>
-                        @endif
-                    </div>
-                    @forelse(auth()->user()->notifications->take(10) as $notif)
-                        <a href="{{ route('notifications.read', $notif->id) }}" class="notif-item {{ $notif->read_at ? '' : 'unread' }}">
-                            <p class="notif-item__title">{{ $notif->data['title'] ?? 'Notifikasi' }}</p>
-                            <p class="notif-item__time">{{ $notif->created_at->diffForHumans() }}</p>
-                        </a>
-                    @empty
-                        <div class="notif-empty">Belum ada notifikasi</div>
-                    @endforelse
-                </div>
-            </div>
-
-            {{-- Wishlist --}}
-            <a href="{{ route('wishlist.index') }}" class="navbar__icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                </svg>
-                @php $wCount = auth()->user()->wishlists()->count(); @endphp
-                @if($wCount > 0)<span class="badge">{{ $wCount }}</span>@endif
-            </a>
-
-            {{-- User dropdown --}}
-            <div class="navbar__icon user-dropdown">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                <div class="user-dropdown__menu">
-                    <span style="padding:10px 18px;display:block;font-size:11px;color:var(--gold)">{{ auth()->user()->name }}</span>
-                    <hr>
-                    <a href="{{ route('profile.edit') }}">Profil Saya</a>
-                    @if(auth()->user()->isSeller())
-                        <a href="{{ route('seller.dashboard') }}">Dashboard Seller</a>
-                    @endif
-                    <hr>
-                    <button form="logout-form" type="submit">Keluar</button>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST">@csrf</form>
-                </div>
-            </div>
-        @else
-            <a href="{{ route('login') }}" class="btn-nav">Masuk</a>
-            <a href="{{ route('register') }}" class="btn btn-primary" style="padding:9px 20px">Daftar</a>
+        <a href="{{ route('orders.index') }}" class="text-link">Pesanan</a>
+        <a href="{{ route('reports.index') }}" class="text-link">Laporan</a>
         @endauth
     </div>
 </nav>
 
-{{-- Flash Messages --}}
-@if(session('success'))
-    <div class="flash flash--success">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="flash flash--error">{{ session('error') }}</div>
-@endif
+<main>
+    <div class="page-wrapper">
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-error">{{ session('error') }}</div>
+        @endif
+        @if(session('info'))
+            <div class="alert alert-info">{{ session('info') }}</div>
+        @endif
 
-<main class="main">
-    @yield('content')
+        @yield('content')
+    </div>
 </main>
 
-<footer class="footer">
-    <div class="footer__grid">
+<footer>
+    <div class="footer-grid">
         <div>
-            <div class="footer__brand-name">Casa<span>Forma</span></div>
-            <p class="footer__tagline">Menghadirkan keindahan dan kenyamanan ke setiap sudut rumah Anda melalui mabel pilihan berkualitas tinggi.</p>
+            <div class="footer-brand">Casa<span>Forma</span></div>
+            <p class="footer-tagline">Furniture pilihan dengan desain artistik untuk rumah Anda yang bermakna.</p>
         </div>
         <div>
-            <p class="footer__heading">Navigasi</p>
-            <ul class="footer__links">
-                <li><a href="{{ route('products.index') }}">Katalog Produk</a></li>
-                <li><a href="{{ route('products.index', ['category' => 'sofa']) }}">Sofa & Kursi</a></li>
-                <li><a href="{{ route('products.index', ['category' => 'meja']) }}">Meja & Lemari</a></li>
-            </ul>
-        </div>
-        <div>
-            <p class="footer__heading">Akun</p>
-            <ul class="footer__links">
-                @auth
-                    <li><a href="{{ route('profile.edit') }}">Profil Saya</a></li>
-                    <li><a href="{{ route('wishlist.index') }}">Wishlist</a></li>
-                @else
-                    <li><a href="{{ route('login') }}">Masuk</a></li>
-                    <li><a href="{{ route('register') }}">Daftar</a></li>
-                @endauth
-            </ul>
-        </div>
-        <div>
-            <p class="footer__heading">Bantuan</p>
-            <ul class="footer__links">
+            <p class="footer-heading">Kebijakan</p>
+            <ul class="footer-links">
                 <li><a href="#">Kebijakan Privasi</a></li>
-                <li><a href="#">Syarat & Ketentuan</a></li>
+                <li><a href="#">Syarat &amp; Ketentuan</a></li>
+                <li><a href="#">Pengembalian</a></li>
+            </ul>
+        </div>
+        <div>
+            <p class="footer-heading">Bantuan</p>
+            <ul class="footer-links">
+                <li><a href="#">FAQ</a></li>
                 <li><a href="#">Hubungi Kami</a></li>
+                <li><a href="#">Panduan Ukuran</a></li>
+            </ul>
+        </div>
+        <div>
+            <p class="footer-heading">Ikuti Kami</p>
+            <ul class="footer-links">
+                <li><a href="#">Instagram</a></li>
+                <li><a href="#">Pinterest</a></li>
+                <li><a href="#">TikTok</a></li>
             </ul>
         </div>
     </div>
-    <div class="footer__bottom">
-        <span>© {{ date('Y') }} CasaForma. Hak cipta dilindungi.</span>
-        <span>Dibuat dengan cinta untuk rumah Anda</span>
+    <div class="footer-bottom">
+        <span>© 2024 CasaForma. Dibuat dengan ❤ untuk rumah Indonesia.</span>
+        <span>Didesain dengan Cinta Digital Tinggi</span>
     </div>
 </footer>
 

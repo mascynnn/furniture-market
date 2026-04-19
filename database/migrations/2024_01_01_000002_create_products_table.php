@@ -9,20 +9,38 @@ return new class extends Migration {
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // seller
+
+            // RELASI
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // seller
+            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+
+            // BASIC
             $table->string('name');
             $table->string('slug')->unique();
-            $table->text('description');
+            $table->text('description')->nullable();
+
+            // PRICE & STOCK
             $table->decimal('price', 12, 2);
             $table->integer('stock')->default(0);
-            $table->string('category'); // sofa, meja, kursi, lemari, dll
+            $table->integer('weight')->default(500);
+
+            // DETAIL PRODUK
             $table->string('material')->nullable();
             $table->string('color')->nullable();
-            $table->string('dimension')->nullable(); // e.g. "120x60x75 cm"
+            $table->string('dimension')->nullable();
             $table->enum('condition', ['new', 'used'])->default('new');
+
+            // MEDIA
+            $table->string('thumbnail')->nullable();
+
+            // STATUS & ANALYTICS
             $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('order_count')->default(0);
+
+            // REVIEW
             $table->decimal('average_rating', 3, 2)->default(0);
             $table->integer('total_reviews')->default(0);
+
             $table->timestamps();
         });
     }
