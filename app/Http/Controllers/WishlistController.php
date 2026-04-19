@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class WishlistController extends Controller
+class WishlistController extends Controller implements HasMiddleware
 {
-    public function __construct()
+    public static function middleware(): array
     {
-        $this->middleware('auth');
+        return [
+            new Middleware('auth'),
+        ];
     }
 
     /**
@@ -50,7 +54,6 @@ class WishlistController extends Controller
             $message = 'Produk ditambahkan ke wishlist!';
         }
 
-        // Jika request Ajax (dari tombol hati di kartu produk)
         if ($request->expectsJson()) {
             return response()->json([
                 'wishlisted' => $status,

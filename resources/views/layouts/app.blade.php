@@ -116,6 +116,7 @@
             font-weight: 600;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
         }
         .btn-nav {
             padding: 8px 20px;
@@ -142,8 +143,11 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             padding: 8px 0;
+            z-index: 300;
         }
-        .user-dropdown:hover .user-dropdown__menu { display: block; }
+        /* Aktif via JS — BUKAN hover */
+        .user-dropdown__menu.open { display: block; }
+
         .user-dropdown__menu a,
         .user-dropdown__menu button {
             display: block; width: 100%;
@@ -461,8 +465,11 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             max-height: 420px; overflow-y: auto;
+            z-index: 300;
         }
-        .notif-dropdown:hover .notif-panel { display: block; }
+        /* Aktif via JS — BUKAN hover */
+        .notif-panel.open { display: block; }
+
         .notif-panel__header {
             padding: 14px 18px;
             border-bottom: 1px solid var(--border);
@@ -479,6 +486,7 @@
             padding: 14px 18px;
             border-bottom: 1px solid var(--border);
             transition: background var(--transition);
+            display: block;
         }
         .notif-item:hover { background: var(--bg-hover); }
         .notif-item.unread { border-left: 2px solid var(--gold); }
@@ -515,16 +523,18 @@
     <div class="navbar__actions">
         @auth
             {{-- Notifikasi --}}
-            <div class="navbar__icon notif-dropdown">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-                @php $unreadCount = auth()->user()->unreadNotifications->count(); @endphp
-                @if($unreadCount > 0)
-                    <span class="badge">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
-                @endif
+            <div class="notif-dropdown">
+                <div class="navbar__icon" id="notif-toggle" aria-label="Notifikasi">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                    @php $unreadCount = auth()->user()->unreadNotifications->count(); @endphp
+                    @if($unreadCount > 0)
+                        <span class="badge">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                    @endif
+                </div>
 
-                <div class="notif-panel">
+                <div class="notif-panel" id="notif-panel">
                     <div class="notif-panel__header">
                         <h4>Notifikasi</h4>
                         @if($unreadCount > 0)
@@ -553,11 +563,13 @@
             </a>
 
             {{-- User dropdown --}}
-            <div class="navbar__icon user-dropdown">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                <div class="user-dropdown__menu">
+            <div class="user-dropdown">
+                <div class="navbar__icon" id="user-toggle" aria-label="Menu pengguna">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                </div>
+                <div class="user-dropdown__menu" id="user-menu">
                     <span style="padding:10px 18px;display:block;font-size:11px;color:var(--gold)">{{ auth()->user()->name }}</span>
                     <hr>
                     <a href="{{ route('profile.edit') }}">Profil Saya</a>
@@ -628,6 +640,61 @@
         <span>Dibuat dengan cinta untuk rumah Anda</span>
     </div>
 </footer>
+
+{{-- ═══════════════════════════════ DROPDOWN SCRIPT ═══════════════════════════════ --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Helper: tutup semua dropdown
+    function closeAll() {
+        document.querySelectorAll('.user-dropdown__menu, .notif-panel').forEach(function (el) {
+            el.classList.remove('open');
+        });
+    }
+
+    // Toggle notifikasi
+    var notifToggle = document.getElementById('notif-toggle');
+    var notifPanel  = document.getElementById('notif-panel');
+    if (notifToggle && notifPanel) {
+        notifToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = notifPanel.classList.contains('open');
+            closeAll();
+            if (!isOpen) notifPanel.classList.add('open');
+        });
+        // Klik dalam panel tidak menutup dropdown
+        notifPanel.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    }
+
+    // Toggle user menu
+    var userToggle = document.getElementById('user-toggle');
+    var userMenu   = document.getElementById('user-menu');
+    if (userToggle && userMenu) {
+        userToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = userMenu.classList.contains('open');
+            closeAll();
+            if (!isOpen) userMenu.classList.add('open');
+        });
+        // Klik dalam menu (misal link/button) tetap bisa berjalan, tapi tidak menutup sebelum navigasi
+        userMenu.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    }
+
+    // Klik di luar = tutup semua
+    document.addEventListener('click', function () {
+        closeAll();
+    });
+
+    // Tekan Escape = tutup semua
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAll();
+    });
+});
+</script>
 
 @stack('scripts')
 </body>
