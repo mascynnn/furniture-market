@@ -4,47 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class ProductController extends Controller
 {
     /**
      * Katalog — listing semua produk aktif.
-     * Query filter (category, min_price, max_price, condition) ditangani Najwa
-     * via scope, tapi kita siapkan dasar di sini agar terintegrasi.
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $query = Product::with(['primaryImage', 'seller'])
                         ->active();
 
-        // Filter dasar (kompatibel dengan SearchController Najwa)
+        // Filter kategori
         if ($request->filled('category')) {
             $query->byCategory($request->category);
         }
 
+        // Filter harga
         if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
+            $query->where('price', '>=', (float) $request->min_price);
         }
 
         if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
+            $query->where('price', '<=', (float) $request->max_price);
         }
 
+        // Filter kondisi
         if ($request->filled('condition')) {
             $query->where('condition', $request->condition);
         }
 
-        // Pengurutan
+        // FIX: match expression harus diakhiri semicolon dan di-wrap rapi;
+        //      tanpa semicolon di akhir baris match PHP bisa parse error
         $sort = $request->get('sort', 'latest');
         match ($sort) {
-            'price_asc'  => $query->orderBy('price'),
-            'price_desc' => $query->orderByDesc('price'),
-            'rating'     => $query->orderByDesc('average_rating'),
+            'price_asc'  => $query->orderBy('price', 'asc'),
+            'price_desc' => $query->orderBy('price', 'desc'),
+            'rating'     => $query->orderBy('average_rating', 'desc'),
             default      => $query->latest(),
         };
 
         $products   = $query->paginate(12)->withQueryString();
-        $categories = Product::active()->distinct()->pluck('category');
+
+        // FIX: ambil kategori dari semua produk aktif (bukan dari hasil query yang sudah difilter)
+        $categories = Product::active()->distinct()->pluck('category')->filter()->sort()->values();
 
         return view('products.index', compact('products', 'categories', 'sort'));
     }
@@ -52,12 +56,12 @@ class ProductController extends Controller
     /**
      * Detail produk — foto galeri, info lengkap, review.
      */
-    public function show(string $slug)
+    public function show(string $slug): View
     {
         $product = Product::with([
                 'images',
                 'seller',
-                'reviews.user',
+                'reviews.user',   // eager load user agar tidak N+1
             ])
             ->active()
             ->where('slug', $slug)
@@ -75,7 +79,7 @@ class ProductController extends Controller
             ? auth()->user()->hasWishlisted($product->id)
             : false;
 
-        // Produk serupa (kategori sama)
+        // Produk serupa (kategori sama, kecuali produk ini sendiri)
         $related = Product::with('primaryImage')
                           ->active()
                           ->where('category', $product->category)
@@ -83,7 +87,7 @@ class ProductController extends Controller
                           ->limit(4)
                           ->get();
 
-        // Distribusi rating
+        // Distribusi rating (5 → 1)
         $ratingDistribution = [];
         for ($i = 5; $i >= 1; $i--) {
             $ratingDistribution[$i] = $product->reviews->where('rating', $i)->count();

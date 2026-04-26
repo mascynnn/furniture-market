@@ -34,7 +34,7 @@ class Product extends Model
     ];
 
     // ── Slug otomatis ───────────────────────────────────────
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
@@ -82,30 +82,50 @@ class Product extends Model
         return $query->where('category', $category);
     }
 
+    // FIX: tambah scope inStock untuk filter produk yang tersedia
+    public function scopeInStock($query)
+    {
+        return $query->where('stock', '>', 0);
+    }
+
     // ── Helper ─────────────────────────────────────────────
     public function getFormattedPriceAttribute(): string
     {
         return 'Rp ' . number_format($this->price, 0, ',', '.');
     }
 
+    /**
+     * FIX: gunakan relasi `primaryImage` (hasOne) jika sudah di-eager-load,
+     *      baru fallback ke koleksi `images`; hindari crash jika koleksi kosong.
+     */
     public function getMainImageUrlAttribute(): string
     {
-        $primary = $this->images->firstWhere('is_primary', true)
-                    ?? $this->images->first();
+        // Coba dari relasi primaryImage yang sudah di-load
+        if ($this->relationLoaded('primaryImage') && $this->primaryImage) {
+            return asset('storage/' . $this->primaryImage->image_path);
+        }
 
-        return $primary
-            ? asset('storage/' . $primary->image_path)
-            : asset('images/placeholder-furniture.jpg');
+        // Fallback ke koleksi images jika sudah di-load
+        if ($this->relationLoaded('images') && $this->images->isNotEmpty()) {
+            $primary = $this->images->firstWhere('is_primary', true)
+                        ?? $this->images->first();
+
+            return asset('storage/' . $primary->image_path);
+        }
+
+        // Placeholder jika tidak ada gambar sama sekali
+        return asset('images/placeholder-furniture.jpg');
     }
 
-    /** Update rata-rata rating setelah review baru disimpan */
+    /** Update rata-rata rating setelah review baru disimpan/dihapus */
     public function recalculateRating(): void
     {
+        // FIX: hindari ambiguitas — panggil avg & count langsung ke DB
         $avg   = $this->reviews()->avg('rating') ?? 0;
         $total = $this->reviews()->count();
 
         $this->update([
-            'average_rating' => round($avg, 2),
+            'average_rating' => round((float) $avg, 2),
             'total_reviews'  => $total,
         ]);
     }

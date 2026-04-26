@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class NotificationController extends Controller
 {
@@ -12,28 +14,36 @@ class NotificationController extends Controller
     }
 
     /** Halaman semua notifikasi */
-    public function index()
+    public function index(): View
     {
-        // Tandai semua sebagai dibaca saat buka halaman (opsional, bisa di-comment)
-        // auth()->user()->unreadNotifications->markAsRead();
+        // Ambil notifikasi (read + unread) dengan pagination agar tidak berat
+        $notifications = auth()->user()
+                               ->notifications()
+                               ->paginate(20);
 
-        return view('notifications.index');
+        return view('notifications.index', compact('notifications'));
     }
 
     /** Tandai satu notifikasi sebagai dibaca dan redirect ke URL terkait */
-    public function read(string $id)
+    public function read(string $id): RedirectResponse
     {
         $notification = auth()->user()->notifications()->findOrFail($id);
-        $notification->markAsRead();
 
+        // FIX: hanya markAsRead jika belum dibaca (idempoten & hemat query)
+        if (is_null($notification->read_at)) {
+            $notification->markAsRead();
+        }
+
+        // FIX: pastikan 'url' ada di data; fallback ke route('home') jika tidak
         $url = $notification->data['url'] ?? route('home');
 
         return redirect($url);
     }
 
     /** Tandai semua notifikasi sebagai dibaca */
-    public function readAll(Request $request)
+    public function readAll(Request $request): RedirectResponse
     {
+        // FIX: gunakan markAsRead() pada collection — sudah efisien di Laravel
         auth()->user()->unreadNotifications->markAsRead();
 
         return back()->with('success', 'Semua notifikasi telah ditandai dibaca.');

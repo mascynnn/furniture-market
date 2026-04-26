@@ -25,13 +25,24 @@ class NewReviewNotification extends Notification
     /** Data yang disimpan ke kolom `data` di tabel notifications */
     public function toDatabase(object $notifiable): array
     {
+        // FIX: hindari trailing "..." pada komentar yang sudah pendek;
+        //      gunakan mb_strlen agar aman dengan karakter multibyte (Unicode/Indonesia)
+        $commentSnippet = '';
+        if (!empty($this->review->comment)) {
+            $comment = $this->review->comment;
+            $commentSnippet = mb_strlen($comment) > 80
+                ? ': "' . mb_substr($comment, 0, 80) . '..."'
+                : ': "' . $comment . '"';
+        }
+
         return [
-            'type'    => 'review',
-            'title'   => 'Ulasan baru untuk ' . $this->product->name,
-            'body'    => $this->review->user->name . ' memberikan rating ' . $this->review->rating . ' bintang'
-                         . ($this->review->comment ? ': "' . mb_substr($this->review->comment, 0, 80) . '..."' : '.'),
-            'url'     => route('products.show', $this->product->slug),
-            'rating'  => $this->review->rating,
+            'type'       => 'review',
+            'title'      => 'Ulasan baru untuk ' . $this->product->name,
+            'body'       => $this->review->user->name
+                            . ' memberikan rating ' . $this->review->rating . ' bintang'
+                            . ($commentSnippet ?: '.'),
+            'url'        => route('products.show', $this->product->slug),
+            'rating'     => $this->review->rating,
             'product_id' => $this->product->id,
         ];
     }

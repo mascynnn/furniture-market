@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Wishlist;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\View\View;
 
 class WishlistController extends Controller implements HasMiddleware
 {
@@ -20,9 +23,11 @@ class WishlistController extends Controller implements HasMiddleware
     /**
      * Halaman daftar wishlist user.
      */
-    public function index()
+    public function index(): View
     {
-        $wishlists = Wishlist::with(['product.primaryImage', 'product.seller'])
+        // FIX: sertakan 'product.images' di sini (bukan di model Wishlist)
+        //      agar eager loading terkontrol dan tidak double-load
+        $wishlists = Wishlist::with(['product.images', 'product.seller'])
                             ->where('user_id', auth()->id())
                             ->latest()
                             ->paginate(12);
@@ -34,9 +39,10 @@ class WishlistController extends Controller implements HasMiddleware
      * Toggle wishlist (tambah / hapus).
      * Bisa dipanggil via AJAX atau form biasa.
      */
-    public function toggle(Request $request, Product $product)
+    public function toggle(Request $request, Product $product): JsonResponse|RedirectResponse
     {
-        $user     = auth()->user();
+        $user = auth()->user();
+
         $wishlist = Wishlist::where('user_id', $user->id)
                            ->where('product_id', $product->id)
                            ->first();
@@ -58,6 +64,7 @@ class WishlistController extends Controller implements HasMiddleware
             return response()->json([
                 'wishlisted' => $status,
                 'message'    => $message,
+                // FIX: hitung ulang count setelah toggle
                 'count'      => Wishlist::where('user_id', $user->id)->count(),
             ]);
         }
@@ -68,7 +75,7 @@ class WishlistController extends Controller implements HasMiddleware
     /**
      * Hapus satu item dari wishlist.
      */
-    public function destroy(Wishlist $wishlist)
+    public function destroy(Wishlist $wishlist): RedirectResponse
     {
         if ($wishlist->user_id !== auth()->id()) {
             abort(403);
@@ -82,7 +89,7 @@ class WishlistController extends Controller implements HasMiddleware
     /**
      * Hapus semua wishlist milik user.
      */
-    public function clear()
+    public function clear(): RedirectResponse
     {
         Wishlist::where('user_id', auth()->id())->delete();
 

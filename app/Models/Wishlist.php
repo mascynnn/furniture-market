@@ -13,8 +13,13 @@ class Wishlist extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * FIX: hapus ->with('images') dari definisi relasi.
+     * Eager loading sebaiknya dilakukan di Controller (Wishlist::with(['product.images']))
+     * agar tidak selalu ikut ter-load saat relasi ini digunakan di konteks lain.
+     */
     public function product()
     {
-        return $this->belongsTo(Product::class)->with('images');
+        return $this->belongsTo(Product::class);
     }
 }
